@@ -214,5 +214,10 @@ namespace COVID_CSV_Parser
         {
             txtStatus.Text = e.Result.ToString();
         }
+
+        private void btnGetLatestStateData_Click(object sender, EventArgs e)
+        {
+            // Test
+        }
     }
 }

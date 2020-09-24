@@ -102,6 +102,7 @@
             this.btnGetLatestStateData.TabIndex = 13;
             this.btnGetLatestStateData.Text = "Force Manual Update";
             this.btnGetLatestStateData.UseVisualStyleBackColor = true;
+            this.btnGetLatestStateData.Click += new System.EventHandler(this.btnGetLatestStateData_Click);
             // 
             // label6
             // 
