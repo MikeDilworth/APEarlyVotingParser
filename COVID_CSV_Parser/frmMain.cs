@@ -2,53 +2,46 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using FileHelpers;
-using System.Text.RegularExpressions;
 using System.Data.SqlClient;
 using System.Configuration;
 using System.Net;
-using System.IO;
-using System.Globalization;
 using System.Timers;
 using RestSharp;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Xml;
 
-namespace COVID_CSV_Parser
+
+namespace AP_EarlyVoting_Parser
 {
-    // Set options for FileHelpers class
-    [DelimitedRecord(",")]
-    [IgnoreEmptyLines()]
-    [IgnoreFirst()]
-
     public partial class frmMain : Form
     {
         // Setup configuration
         public static Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
 
-        // Instantiate SQL connection & command
-        public static SqlConnection conn = new SqlConnection(config.AppSettings.Settings["sqlConnString"].Value);
-        public static SqlCommand cmd = new SqlCommand();
-      
+        //public static SqlConnection conn = new SqlConnection(config.AppSettings.Settings["sqlConnString"].Value);
+        //public static SqlCommand cmd = new SqlCommand();
+
         // Schedule timer
         static System.Timers.Timer timer;
         static DateTime nowTime = DateTime.Now;
         static DateTime scheduledTime;
 
+        // Set data URL
+        public string urlForData = "https://api.ap.org/v2/reports/d34c0da52f2b44389de43a43f05a2289?apikey=xEOmjspBfmqSpyWx5hIPfrDWxsbrKrSv";
+
         // Declare background worker thread
         private BackgroundWorker backgroundWorker1;
 
+
         public frmMain()
         {
+            System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12;
+
             InitializeComponent();
 
-            // Start the schedule timer
+            // Init timer
             schedule_Timer();
 
             // Setup the background worker thread
@@ -57,8 +50,8 @@ namespace COVID_CSV_Parser
             backgroundWorker1.RunWorkerCompleted += new RunWorkerCompletedEventHandler(BackgroundWorker1_RunWorkerCompleted);
         }
 
-        // Method to read in the latest state-level data file and post the results to the SQL DB
-        private void GetLatestData(Boolean downloadLatestData)
+        // Method to read in the latest state-level early voting data file and post the results to the SQL DB
+        private void GetLatestData()
         {
             try
             {
@@ -70,86 +63,126 @@ namespace COVID_CSV_Parser
                 ServicePointManager.Expect100Continue = true;
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
-                var client = new RestClient("http://covidtracking.com/api/v1/states/daily.json");
-                client.Timeout = -1;
-                var request = new RestRequest(Method.GET);
-                IRestResponse response = client.Execute(request);
-
-                // Create list for data records
-                var DailyDataList = new List<DailyStateTotals>();
-
-                var StateDataAr = JArray.Parse(response.Content);
-
-                Int32 rowCount = 0;
-                logTxt.Clear();
-
-                foreach (JObject a in StateDataAr)
+                var stateDataRecord = new EarlyVotingStateData
                 {
-                    var StateData = JObject.Parse(a.ToString());
+                };
 
-                    DailyStateTotals foo = new DailyStateTotals
-                    {
-                        date = (string)StateData.SelectToken("date"),
-                        state = (string)StateData.SelectToken("state"),
-                        positive = (string)StateData.SelectToken("positive"),
-                        negative = (string)StateData.SelectToken("negative"),
-                        deaths = (string)StateData.SelectToken("death"),
-                        hospitalized = (string)StateData.SelectToken("hospitalized"),
-                        total = (string)StateData.SelectToken("total"),
-                        totalResults = (string)StateData.SelectToken("totalTestResults"),
-                        fips = (string)StateData.SelectToken("fips"),
-                        deathInc = (string)StateData.SelectToken("deathIncrease"),
-                        hospInc = (string)StateData.SelectToken("hospitalizedIncrease"),
-                        negativeInc = (string)StateData.SelectToken("negativeIncrease"),
-                        positiveInc = (string)StateData.SelectToken("positiveIncrease"),
-                        totalTestResultsInc = (string)StateData.SelectToken("totalTestResultsIncrease")
-                    };
+                XmlDocument x = new XmlDocument();
+                x.Load(urlForData);
 
-                    DailyDataList.Add(foo);
-                    rowCount++;
-                }
+                XmlNodeList xList = x.SelectNodes("//stateAdvanceTurnout");
 
                 SqlConnection conn = new SqlConnection(config.AppSettings.Settings["sqlConnString"].Value);
-                conn.Open();
-                SqlCommand cmd;
+                SqlCommand cmd = new SqlCommand();
 
-                foreach (DailyStateTotals b in DailyDataList)
+                int rowCount = 0;
+
+                //Iterates thru each race
+                foreach (XmlNode a in xList)
                 {
-                    cmd = new SqlCommand(config.AppSettings.Settings["storedProcedure_State"].Value, conn)
+                    try
                     {
-                        CommandType = CommandType.StoredProcedure,
-                    };
+                        stateDataRecord.statePostal = a["statePostal"].InnerText;
+                    }
+                    catch (NullReferenceException e)
+                    {
+                        stateDataRecord.statePostal = "N/A";
+                    }
+                    try
+                    {
+                        stateDataRecord.mailOrAbsBallotsRequested = a["mailOrAbsBallotsRequested"].InnerText;
+                    }
+                    catch (NullReferenceException e)
+                    {
+                        stateDataRecord.mailOrAbsBallotsRequested = "N/A";
+                    }
+                    try
+                    {
+                        stateDataRecord.mailOrAbsBallotsSent = a["mailOrAbsBallotsSent"].InnerText;
+                    }
+                    catch (NullReferenceException e)
+                    {
+                        stateDataRecord.mailOrAbsBallotsSent = "N/A";
+                    }
+                    try
+                    {
+                        stateDataRecord.mailOrAbsBallotsCast = a["mailOrAbsBallotsCast"].InnerText;
+                    }
+                    catch (NullReferenceException e)
+                    {
+                        stateDataRecord.mailOrAbsBallotsCast = "N/A";
+                    }
+                    try
+                    {
+                        stateDataRecord.earlyInPersonCast = a["earlyInPersonCast"].InnerText;
+                    }
+                    catch (NullReferenceException e)
+                    {
+                        stateDataRecord.earlyInPersonCast = "N/A";
+                    }
+                    try
+                    {
+                        stateDataRecord.totalAdvVotesCast = a["totalAdvVotesCast"].InnerText;
+                    }
+                    catch (NullReferenceException e)
+                    {
+                        stateDataRecord.totalAdvVotesCast = "N/A";
+                    }
+                    try
+                    {
+                        stateDataRecord.dateofLastUpdate = a["dateofLastUpdate"].InnerText;
+                    }
+                    catch (NullReferenceException e)
+                    {
+                        stateDataRecord.dateofLastUpdate = "N/A";
+                    }
+                    stateDataRecord.updateDateTime = DateTime.Now;
 
-                    //ADD PARAMETER NAMES IN FIRST ARGUMENT VALUES
-                    //cmd.Parameters.AddWithValue("@date", GetDateTimeString(b.date));
-                    cmd.Parameters.AddWithValue("@state", b.state ?? "");
-                    cmd.Parameters.AddWithValue("@positive", b.positive ?? "");
-                    cmd.Parameters.AddWithValue("@negative", b.negative ?? "");
-                    cmd.Parameters.AddWithValue("@deaths", b.deaths ?? "");
-                    cmd.Parameters.AddWithValue("@hospitalized", b.hospitalized ?? "");
-                    cmd.Parameters.AddWithValue("@total", b.total ?? "");
-                    cmd.Parameters.AddWithValue("@totalResults", b.totalResults ?? "");
-                    cmd.Parameters.AddWithValue("@fips", b.fips ?? "0");
-                    cmd.Parameters.AddWithValue("@deathInc", b.deathInc ?? "");
-                    cmd.Parameters.AddWithValue("@hospInc", b.hospInc ?? "");
-                    cmd.Parameters.AddWithValue("@negativeInc", b.negativeInc ?? "");
-                    cmd.Parameters.AddWithValue("@positiveInc", b.positiveInc ?? "");
-                    cmd.Parameters.AddWithValue("@totalTestResultsInc", b.totalTestResultsInc ?? "");
+                    try
+                    {
+                        rowCount++;
 
-                    // Handle conversion to get heat map color index value                    
-                    //if (b.positive == null) b.positive = "0";
-                    //cmd.Parameters.AddWithValue("@ColorIndex_HeatMap", GetCubeRootColorIndex(int.Parse(b.positive)));
+                        conn.Open();
+                        cmd = new SqlCommand(config.AppSettings.Settings["storedProcedure"].Value, conn);
+                        cmd.CommandType = CommandType.StoredProcedure;
 
-                    cmd.ExecuteNonQuery();
+                        cmd.Parameters.Add(new SqlParameter("@StateMnemonic", stateDataRecord.statePostal));
+
+                        cmd.Parameters.Add(new SqlParameter("@Year", 2020));
+
+                        int ballotsSentRequested = Extensions.ParseInt(stateDataRecord.mailOrAbsBallotsSent, 0) + Extensions.ParseInt(stateDataRecord.mailOrAbsBallotsRequested, 0);
+                        cmd.Parameters.Add(new SqlParameter("@BallotsSentRequested", ballotsSentRequested));
+
+                        int ballotsReturned = Extensions.ParseInt(stateDataRecord.mailOrAbsBallotsCast, 0);
+                        cmd.Parameters.Add(new SqlParameter("@BallotsReturned", ballotsReturned));
+
+                        int earlyInPersonVote = Extensions.ParseInt(stateDataRecord.earlyInPersonCast, 0);
+                        cmd.Parameters.Add(new SqlParameter("@EarlyInPersonVote", earlyInPersonVote));
+
+                        int totalAdvanceTurnout = Extensions.ParseInt(stateDataRecord.totalAdvVotesCast, 0);
+                        cmd.Parameters.Add(new SqlParameter("@TotalAdvanceTurnout", totalAdvanceTurnout));
+
+                        cmd.Parameters.Add(new SqlParameter("@DateOfLastUpdate", stateDataRecord.dateofLastUpdate));
+
+                        //cmd.Parameters.Add(new SqlParameter("@UpdateDateTime", SqlDbType.DateTime).Value = stateDataRecord.updateDateTime);
+
+                        cmd.ExecuteNonQuery();
+
+                        conn.Close();
+                    }
+                    catch (Exception e)
+                    {
+                        logTxt.AppendText("Error occurred during database posting on row " + rowCount.ToString() + ": " + e.Message + Environment.NewLine);
+                    }
                 }
-
+              
                 conn.Close();
                 // Display stats for processing
                 elapsed.Stop();
                 logTxt.AppendText("Last state data update processed: " + DateTime.Now.ToString() + Environment.NewLine);
                 logTxt.AppendText("Data rows processed: " + rowCount.ToString() + Environment.NewLine);
                 logTxt.AppendText("Total elapsed time (seconds): " + elapsed.Elapsed.TotalSeconds + Environment.NewLine);
-                txtStatus.Text = "State-Level data update completed successfully at: " + DateTime.Now.ToString();
+                txtStatus.Text = "State-Level data early voting data update completed at: " + DateTime.Now.ToString();
 
             }
             catch (Exception e)
@@ -158,20 +191,13 @@ namespace COVID_CSV_Parser
             }
         }
 
-        // Handler for button to force getting latest data
-        private void btnGetData_Click(object sender, EventArgs e)
-        {
-            // Call method with flag set to download the latest data; if false, filename is specified as 2nd parameter
-            //GetLatestData_County(true, String.Empty);
-        }
-
         // Here's the scheduling timer
-        //static void schedule_Timer()
         void schedule_Timer()
         {
-            Console.WriteLine("### Timer Started ###");
+            //Console.WriteLine("### Timer Started ###");
+           logTxt.AppendText("### Timer Started ###" + Environment.NewLine);
 
-            nowTime = DateTime.Now;
+           nowTime = DateTime.Now;
             scheduledTime = new DateTime(nowTime.Year, nowTime.Month, nowTime.Day, 6, 0, 0, 0); // Start at 6:00 AM
 
             if (nowTime > scheduledTime)
@@ -194,7 +220,7 @@ namespace COVID_CSV_Parser
             // Call method with flag set to download the latest data; if false, filename is specified as 2nd parameter
             //GetLatestData_County(true, String.Empty);
 
-            GetLatestData(true);
+            GetLatestData();
 
             // Stop the timer
             timer.Stop();
@@ -217,7 +243,22 @@ namespace COVID_CSV_Parser
 
         private void btnGetLatestStateData_Click(object sender, EventArgs e)
         {
-            // Test
+            GetLatestData();
         }
     }
+    public static class Extensions
+    {
+        public static int ParseInt(this string value, int defaultIntValue = 0)
+        {
+            int parsedInt;
+            if (int.TryParse(value, out parsedInt))
+            {
+                return parsedInt;
+            }
+
+            return defaultIntValue;
+        }
+    }
+
+
 }

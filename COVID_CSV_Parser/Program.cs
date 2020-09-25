@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace COVID_CSV_Parser
+namespace AP_EarlyVoting_Parser
 {
     static class Program
     {

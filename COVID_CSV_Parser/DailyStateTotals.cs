@@ -4,23 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace COVID_CSV_Parser
+namespace AP_EarlyVoting_Parser
 {
-    public class DailyStateTotals
+    public class EarlyVotingStateData
     {
-        public string date;
-        public string state;
-        public string positive;
-        public string negative;
-        public string deaths;
-        public string hospitalized;
-        public string total;
-        public string totalResults;
-        public string fips;
-        public string deathInc;
-        public string hospInc;
-        public string negativeInc;
-        public string positiveInc;
-        public string totalTestResultsInc;
+        public string statePostal { get; set; }
+        public string mailOrAbsBallotsRequested { get; set; }
+        public string mailOrAbsBallotsSent { get; set; }
+        public string mailOrAbsBallotsCast { get; set; }
+        public string earlyInPersonCast { get; set; }
+        public string totalAdvVotesCast { get; set; }
+        public string dateofLastUpdate { get; set; }
+        public DateTime updateDateTime { get; set; }
     }
 }

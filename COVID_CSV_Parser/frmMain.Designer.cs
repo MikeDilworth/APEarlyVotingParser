@@ -1,4 +1,4 @@
-﻿namespace COVID_CSV_Parser
+﻿namespace AP_EarlyVoting_Parser
 {
     partial class frmMain
     {
@@ -31,9 +31,6 @@
             this.logTxt = new System.Windows.Forms.TextBox();
             this.txtStatus = new System.Windows.Forms.TextBox();
             this.lblData = new System.Windows.Forms.Label();
-            this.chkShowLogData = new System.Windows.Forms.CheckBox();
-            this.lblStateFileProcessed = new System.Windows.Forms.Label();
-            this.lblProcessedState = new System.Windows.Forms.Label();
             this.btnGetLatestStateData = new System.Windows.Forms.Button();
             this.label6 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
@@ -41,7 +38,7 @@
             // 
             // logTxt
             // 
-            this.logTxt.Location = new System.Drawing.Point(15, 349);
+            this.logTxt.Location = new System.Drawing.Point(12, 97);
             this.logTxt.Multiline = true;
             this.logTxt.Name = "logTxt";
             this.logTxt.ScrollBars = System.Windows.Forms.ScrollBars.Both;
@@ -50,7 +47,7 @@
             // 
             // txtStatus
             // 
-            this.txtStatus.Location = new System.Drawing.Point(62, 587);
+            this.txtStatus.Location = new System.Drawing.Point(59, 335);
             this.txtStatus.Name = "txtStatus";
             this.txtStatus.ReadOnly = true;
             this.txtStatus.Size = new System.Drawing.Size(501, 20);
@@ -59,40 +56,11 @@
             // lblData
             // 
             this.lblData.AutoSize = true;
-            this.lblData.Location = new System.Drawing.Point(16, 330);
+            this.lblData.Location = new System.Drawing.Point(13, 78);
             this.lblData.Name = "lblData";
             this.lblData.Size = new System.Drawing.Size(33, 13);
             this.lblData.TabIndex = 3;
             this.lblData.Text = "Data:";
-            // 
-            // chkShowLogData
-            // 
-            this.chkShowLogData.AutoSize = true;
-            this.chkShowLogData.Location = new System.Drawing.Point(55, 330);
-            this.chkShowLogData.Name = "chkShowLogData";
-            this.chkShowLogData.Size = new System.Drawing.Size(142, 17);
-            this.chkShowLogData.TabIndex = 12;
-            this.chkShowLogData.Text = "Show Detailed Log Data";
-            this.chkShowLogData.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.chkShowLogData.UseVisualStyleBackColor = true;
-            // 
-            // lblStateFileProcessed
-            // 
-            this.lblStateFileProcessed.AutoSize = true;
-            this.lblStateFileProcessed.Location = new System.Drawing.Point(176, 51);
-            this.lblStateFileProcessed.Name = "lblStateFileProcessed";
-            this.lblStateFileProcessed.Size = new System.Drawing.Size(88, 13);
-            this.lblStateFileProcessed.TabIndex = 18;
-            this.lblStateFileProcessed.Text = "No date selected";
-            // 
-            // lblProcessedState
-            // 
-            this.lblProcessedState.AutoSize = true;
-            this.lblProcessedState.Location = new System.Drawing.Point(176, 33);
-            this.lblProcessedState.Name = "lblProcessedState";
-            this.lblProcessedState.Size = new System.Drawing.Size(101, 13);
-            this.lblProcessedState.TabIndex = 17;
-            this.lblProcessedState.Text = "Data file processed:";
             // 
             // btnGetLatestStateData
             // 
@@ -117,7 +85,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(16, 594);
+            this.label1.Location = new System.Drawing.Point(13, 342);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(40, 13);
             this.label1.TabIndex = 21;
@@ -127,13 +95,10 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(577, 623);
+            this.ClientSize = new System.Drawing.Size(577, 370);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.label6);
-            this.Controls.Add(this.lblStateFileProcessed);
-            this.Controls.Add(this.lblProcessedState);
             this.Controls.Add(this.btnGetLatestStateData);
-            this.Controls.Add(this.chkShowLogData);
             this.Controls.Add(this.lblData);
             this.Controls.Add(this.txtStatus);
             this.Controls.Add(this.logTxt);
@@ -149,9 +114,6 @@
         private System.Windows.Forms.TextBox logTxt;
         private System.Windows.Forms.TextBox txtStatus;
         private System.Windows.Forms.Label lblData;
-        private System.Windows.Forms.CheckBox chkShowLogData;
-        private System.Windows.Forms.Label lblStateFileProcessed;
-        private System.Windows.Forms.Label lblProcessedState;
         private System.Windows.Forms.Button btnGetLatestStateData;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label1;
