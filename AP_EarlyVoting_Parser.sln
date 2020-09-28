@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.645
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AP_EarlyVoting_Parser", "COVID_CSV_Parser\AP_EarlyVoting_Parser.csproj", "{E4955EFF-70BE-4B82-BF6E-4ED1CE9A2CC8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AP_EarlyVoting_Parser", "AP_EarlyVoting_Parser\AP_EarlyVoting_Parser.csproj", "{E4955EFF-70BE-4B82-BF6E-4ED1CE9A2CC8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
