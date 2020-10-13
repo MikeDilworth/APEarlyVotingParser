@@ -188,8 +188,21 @@ namespace AP_EarlyVoting_Parser
 
                             cmd.Parameters.Add(new SqlParameter("@Year", 2020));
 
-                            int ballotsSentRequested = Extensions.ParseInt(stateDataRecord.mailOrAbsBallotsSent, 0) + Extensions.ParseInt(stateDataRecord.mailOrAbsBallotsRequested, 0);
-                            cmd.Parameters.Add(new SqlParameter("@BallotsSentRequested", ballotsSentRequested));
+
+                            //int ballotsSentRequested = Extensions.ParseInt(stateDataRecord.mailOrAbsBallotsSent, 0);// + Extensions.ParseInt(stateDataRecord.mailOrAbsBallotsRequested, 0);
+                            //cmd.Parameters.Add(new SqlParameter("@BallotsSentRequested", ballotsSentRequested));
+
+                            int ballotsSent = Extensions.ParseInt(stateDataRecord.mailOrAbsBallotsSent, 0);
+                            int ballotsRequested = Extensions.ParseInt(stateDataRecord.mailOrAbsBallotsRequested, 0);
+
+                            if (ballotsRequested > ballotsSent)
+                            {
+                                cmd.Parameters.Add(new SqlParameter("@BallotsSentRequested", ballotsRequested));
+                            }
+                            else
+                            {
+                                cmd.Parameters.Add(new SqlParameter("@BallotsSentRequested", ballotsSent));
+                            }
 
                             int ballotsReturned = Extensions.ParseInt(stateDataRecord.mailOrAbsBallotsCast, 0);
                             cmd.Parameters.Add(new SqlParameter("@BallotsReturned", ballotsReturned));
