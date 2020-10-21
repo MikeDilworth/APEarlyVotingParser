@@ -29,9 +29,11 @@ namespace AP_EarlyVoting_Parser
         // Schedule timer
         static System.Timers.Timer timer;
         static System.Timers.Timer timer2;
+        static System.Timers.Timer timer3;
         static DateTime nowTime = DateTime.Now;
         static DateTime scheduledTime;
         static DateTime scheduledTime2;
+        static DateTime scheduledTime3;
 
         // Set URLs
         public string urlForReports = "https://api.ap.org/v2/reports?apikey=xEOmjspBfmqSpyWx5hIPfrDWxsbrKrSv&type=advvotes";
@@ -240,8 +242,9 @@ namespace AP_EarlyVoting_Parser
                             EarlyVotingStateData earlyVotingStateData = new EarlyVotingStateData
                             {
                                 statePostal = stateDataRecord.statePostal,
-                                mailOrAbsBallotsRequested = ballotsSentRequested.ToString(),
-                                mailOrAbsBallotsSent = ballotsSentRequested.ToString(),
+                                //mailOrAbsBallotsRequested = ballotsSentRequested.ToString(),
+                                mailOrAbsBallotsRequested = ballotsRequested.ToString(),
+                                mailOrAbsBallotsSent = ballotsSent.ToString(),
                                 mailOrAbsBallotsCast = stateDataRecord.mailOrAbsBallotsCast,
                                 earlyInPersonCast = stateDataRecord.earlyInPersonCast,
                                 totalAdvVotesCast = stateDataRecord.totalAdvVotesCast,
@@ -305,14 +308,14 @@ namespace AP_EarlyVoting_Parser
             logTxt.AppendText("Timer #1 set to fire at: " + scheduledTime.ToString() + Environment.NewLine);
         }
 
-        // Setup timer for 6:00 PM
+        // Setup timer for 12:00 PM
         void schedule_Timer2()
         {
             //Console.WriteLine("### Timer Started ###");
             logTxt.AppendText("### Timer #2 Started ###" + Environment.NewLine);
 
             nowTime = DateTime.Now;
-            scheduledTime = new DateTime(nowTime.Year, nowTime.Month, nowTime.Day, 18, 0, 0, 0); // Start at 6:00 PM
+            scheduledTime = new DateTime(nowTime.Year, nowTime.Month, nowTime.Day, 12, 0, 0, 0); // Start at 12:00 PM
 
             if (nowTime > scheduledTime)
             {
@@ -325,6 +328,28 @@ namespace AP_EarlyVoting_Parser
             timer2.Start();
 
             logTxt.AppendText("Timer #2 set to fire at: " + scheduledTime.ToString() + Environment.NewLine);
+        }
+
+        // Setup timer for 6:00 PM
+        void schedule_Timer3()
+        {
+            //Console.WriteLine("### Timer Started ###");
+            logTxt.AppendText("### Timer #3 Started ###" + Environment.NewLine);
+
+            nowTime = DateTime.Now;
+            scheduledTime = new DateTime(nowTime.Year, nowTime.Month, nowTime.Day, 18, 0, 0, 0); // Start at 6:00 PM
+
+            if (nowTime > scheduledTime)
+            {
+                scheduledTime = scheduledTime.AddDays(1);
+            }
+
+            double tickTime = (double)(scheduledTime - DateTime.Now).TotalMilliseconds;
+            timer3 = new System.Timers.Timer(tickTime);
+            timer3.Elapsed += new ElapsedEventHandler(timer_Elapsed);
+            timer3.Start();
+
+            logTxt.AppendText("Timer #3 set to fire at: " + scheduledTime.ToString() + Environment.NewLine);
         }
 
         // Timer #1 elapsed event
@@ -365,6 +390,25 @@ namespace AP_EarlyVoting_Parser
             schedule_Timer2();
         }
 
+        // Timer #3 elapsed event
+        void timer3_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            // Update status label
+            //txtStatus.Text = "Update timer fired at " + DateTime.Now.ToString();
+            logTxt.AppendText("Update timer #3 fired at " + DateTime.Now.ToString() + Environment.NewLine);
+
+            GetLatestData();
+
+            // Send the data e-mail
+            sendDataEMail();
+
+            // Stop the timer
+            timer3.Stop();
+
+            // Restart
+            schedule_Timer2();
+        }
+
         private void BackgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
         {
             GetLatestData();
@@ -397,6 +441,7 @@ namespace AP_EarlyVoting_Parser
             // Init timers
             schedule_Timer();
             schedule_Timer2();
+            schedule_Timer3();
         }
 
         public static void sendDataEMail()
@@ -416,12 +461,14 @@ namespace AP_EarlyVoting_Parser
                 messageBody += htmlTableStart;
                 messageBody += htmlHeaderRowStart;
                 messageBody += htmlTdStart + "State Postal" + htmlTdEnd;
-                messageBody += htmlTdStart + "Ballots Sent/Requested" + htmlTdEnd;
+                messageBody += htmlTdStart + "Ballots Requested" + htmlTdEnd;
+                messageBody += htmlTdStart + "Ballots Sent" + htmlTdEnd;
                 messageBody += htmlTdStart + "Ballots Cast" + htmlTdEnd;
                 messageBody += htmlTdStart + "In Person Vote" + htmlTdEnd;
                 messageBody += htmlTdStart + "Total Advance Vote" + htmlTdEnd;
                 messageBody += htmlHeaderRowEnd;
                 int totalMailOrAbsBallotsRequested = 0;
+                int totalMailOrAbsBallotsSent = 0;
                 int totalMailOrAbsBallotsCast = 0;
                 int totalEarlyInPersonCast = 0;
                 int totalTotalAdvVotesCast = 0;
@@ -432,6 +479,7 @@ namespace AP_EarlyVoting_Parser
                     messageBody = messageBody + htmlTrStart;
                     messageBody = messageBody + htmlTdStart + _stateAdvanceVotingDataCollection.EarlyVotingStateDataObjects[i].statePostal + htmlTdEnd; 
                     messageBody = messageBody + htmlTdStart + String.Format("{0:n0}", Extensions.ParseInt(_stateAdvanceVotingDataCollection.EarlyVotingStateDataObjects[i].mailOrAbsBallotsRequested)) + htmlTdEnd;
+                    messageBody = messageBody + htmlTdStart + String.Format("{0:n0}", Extensions.ParseInt(_stateAdvanceVotingDataCollection.EarlyVotingStateDataObjects[i].mailOrAbsBallotsSent)) + htmlTdEnd;
                     messageBody = messageBody + htmlTdStart + String.Format("{0:n0}", Extensions.ParseInt(_stateAdvanceVotingDataCollection.EarlyVotingStateDataObjects[i].mailOrAbsBallotsCast)) + htmlTdEnd;
                     messageBody = messageBody + htmlTdStart + String.Format("{0:n0}", Extensions.ParseInt(_stateAdvanceVotingDataCollection.EarlyVotingStateDataObjects[i].earlyInPersonCast)) + htmlTdEnd;
                     messageBody = messageBody + htmlTdStart + String.Format("{0:n0}", Extensions.ParseInt(_stateAdvanceVotingDataCollection.EarlyVotingStateDataObjects[i].totalAdvVotesCast)) + htmlTdEnd;
@@ -439,6 +487,7 @@ namespace AP_EarlyVoting_Parser
 
                     // Sum up totals & add to table
                     totalMailOrAbsBallotsRequested += Extensions.ParseInt(_stateAdvanceVotingDataCollection.EarlyVotingStateDataObjects[i].mailOrAbsBallotsRequested);
+                    totalMailOrAbsBallotsSent += Extensions.ParseInt(_stateAdvanceVotingDataCollection.EarlyVotingStateDataObjects[i].mailOrAbsBallotsSent);
                     totalMailOrAbsBallotsCast += Extensions.ParseInt(_stateAdvanceVotingDataCollection.EarlyVotingStateDataObjects[i].mailOrAbsBallotsCast);
                     totalEarlyInPersonCast += Extensions.ParseInt(_stateAdvanceVotingDataCollection.EarlyVotingStateDataObjects[i].earlyInPersonCast);
                     totalTotalAdvVotesCast += Extensions.ParseInt(_stateAdvanceVotingDataCollection.EarlyVotingStateDataObjects[i].totalAdvVotesCast);
@@ -450,9 +499,11 @@ namespace AP_EarlyVoting_Parser
                 messageBody = messageBody + htmlTdStart + " " + htmlTdEnd;
                 messageBody = messageBody + htmlTdStart + " " + htmlTdEnd;
                 messageBody = messageBody + htmlTdStart + " " + htmlTdEnd;
+                messageBody = messageBody + htmlTdStart + " " + htmlTdEnd;
                 messageBody = messageBody + htmlTrEnd;
                 messageBody = messageBody + htmlTdStart + "U.S. TOTAL" + htmlTdEnd;
                 messageBody = messageBody + htmlTdStart + String.Format("{0:n0}", totalMailOrAbsBallotsRequested) + htmlTdEnd;
+                messageBody = messageBody + htmlTdStart + String.Format("{0:n0}", totalMailOrAbsBallotsSent) + htmlTdEnd;
                 messageBody = messageBody + htmlTdStart + String.Format("{0:n0}", totalMailOrAbsBallotsCast) + htmlTdEnd;
                 messageBody = messageBody + htmlTdStart + String.Format("{0:n0}", totalEarlyInPersonCast) + htmlTdEnd;
                 messageBody = messageBody + htmlTdStart + String.Format("{0:n0}", totalTotalAdvVotesCast) + htmlTdEnd;
@@ -461,6 +512,7 @@ namespace AP_EarlyVoting_Parser
                 messageBody = messageBody + htmlTableEnd;
 
                 MailMessage mail = new MailMessage("ElectionData@foxnews.com", "seniorproducers@foxnews.com, producers@foxnews.com, brainroom@foxnews.com, politics3@foxnews.com, mike.dilworth@foxnews.com"); //config.AppSettings.Settings["toEmail"].Value);
+                //MailMessage mail = new MailMessage("ElectionData@foxnews.com", "mike.dilworth@foxnews.com"); //config.AppSettings.Settings["toEmail"].Value);
                 SmtpClient mailClient = new SmtpClient();
                 mailClient.Port = 25;
                 mailClient.DeliveryMethod = SmtpDeliveryMethod.Network;
