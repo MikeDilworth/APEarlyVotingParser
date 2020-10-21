@@ -289,7 +289,6 @@ namespace AP_EarlyVoting_Parser
         // Setup timer for 6:00 AM
         void schedule_Timer()
         {
-            //Console.WriteLine("### Timer Started ###");
            logTxt.AppendText("### Timer #1 Started ###" + Environment.NewLine);
 
            nowTime = DateTime.Now;
@@ -311,7 +310,6 @@ namespace AP_EarlyVoting_Parser
         // Setup timer for 12:00 PM
         void schedule_Timer2()
         {
-            //Console.WriteLine("### Timer Started ###");
             logTxt.AppendText("### Timer #2 Started ###" + Environment.NewLine);
 
             nowTime = DateTime.Now;
@@ -324,7 +322,7 @@ namespace AP_EarlyVoting_Parser
 
             double tickTime = (double)(scheduledTime - DateTime.Now).TotalMilliseconds;
             timer2 = new System.Timers.Timer(tickTime);
-            timer2.Elapsed += new ElapsedEventHandler(timer_Elapsed);
+            timer2.Elapsed += new ElapsedEventHandler(timer2_Elapsed);
             timer2.Start();
 
             logTxt.AppendText("Timer #2 set to fire at: " + scheduledTime.ToString() + Environment.NewLine);
@@ -346,7 +344,7 @@ namespace AP_EarlyVoting_Parser
 
             double tickTime = (double)(scheduledTime - DateTime.Now).TotalMilliseconds;
             timer3 = new System.Timers.Timer(tickTime);
-            timer3.Elapsed += new ElapsedEventHandler(timer_Elapsed);
+            timer3.Elapsed += new ElapsedEventHandler(timer3_Elapsed);
             timer3.Start();
 
             logTxt.AppendText("Timer #3 set to fire at: " + scheduledTime.ToString() + Environment.NewLine);
@@ -356,7 +354,6 @@ namespace AP_EarlyVoting_Parser
         void timer_Elapsed(object sender, ElapsedEventArgs e)
         {
             // Update status label
-            //txtStatus.Text = "Update timer fired at " + DateTime.Now.ToString();
             logTxt.AppendText("Update timer #1 fired at " + DateTime.Now.ToString() + Environment.NewLine);
 
             GetLatestData();
@@ -375,7 +372,6 @@ namespace AP_EarlyVoting_Parser
         void timer2_Elapsed(object sender, ElapsedEventArgs e)
         {
             // Update status label
-            //txtStatus.Text = "Update timer fired at " + DateTime.Now.ToString();
             logTxt.AppendText("Update timer #2 fired at " + DateTime.Now.ToString() + Environment.NewLine);
 
             GetLatestData();
@@ -394,7 +390,6 @@ namespace AP_EarlyVoting_Parser
         void timer3_Elapsed(object sender, ElapsedEventArgs e)
         {
             // Update status label
-            //txtStatus.Text = "Update timer fired at " + DateTime.Now.ToString();
             logTxt.AppendText("Update timer #3 fired at " + DateTime.Now.ToString() + Environment.NewLine);
 
             GetLatestData();
@@ -406,7 +401,7 @@ namespace AP_EarlyVoting_Parser
             timer3.Stop();
 
             // Restart
-            schedule_Timer2();
+            schedule_Timer3();
         }
 
         private void BackgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
