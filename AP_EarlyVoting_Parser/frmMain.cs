@@ -506,7 +506,12 @@ namespace AP_EarlyVoting_Parser
 
                 messageBody = messageBody + htmlTableEnd;
 
-                MailMessage mail = new MailMessage("ElectionData@foxnews.com", "seniorproducers@foxnews.com, producers@foxnews.com, brainroom@foxnews.com, politics3@foxnews.com, mike.dilworth@foxnews.com"); //config.AppSettings.Settings["toEmail"].Value);
+                /*
+                MailMessage mail = new MailMessage("ElectionData@foxnews.com", "seniorproducers@foxnews.com, producers@foxnews.com, brainroom@foxnews.com, politics3@foxnews.com, mike.dilworth@foxnews.com, MediaProdManagers@foxnews.com, Jason.Kornegay@foxnews.com"); //config.AppSettings.Settings["toEmail"].Value);
+                
+                */
+                MailMessage mail = new MailMessage("ElectionData@foxnews.com", "mike.dilworth@foxnews.com"); //config.AppSettings.Settings["toEmail"].Value);
+                //MailMessage mail = new MailMessage("ElectionData@foxnews.com", "seniorproducers@foxnews.com, producers@foxnews.com, brainroom@foxnews.com, politics3@foxnews.com, mike.dilworth@foxnews.com, MediaProdManagers@foxnews.com, Jason.Kornegay@foxnews.com"); //config.AppSettings.Settings["toEmail"].Value);
                 //MailMessage mail = new MailMessage("ElectionData@foxnews.com", "mike.dilworth@foxnews.com"); //config.AppSettings.Settings["toEmail"].Value);
                 SmtpClient mailClient = new SmtpClient();
                 mailClient.Port = 25;
